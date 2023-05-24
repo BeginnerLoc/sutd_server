@@ -2,7 +2,7 @@ from fastapi import APIRouter, Query
 from config.database import db
 from models.answer_model import Answer
 from schemas.answer_schema import answer_serializer, answers_serializer
-
+from utils.tokenize import to_words
 
 answer_api_router = APIRouter()
 
@@ -17,6 +17,19 @@ async def get_answer(question_no: str = Query(None), student_id: str = Query(Non
         collection = db[f"2018MidtermQ{question_no}"]
         filter = {"student_id": student_id}
         results = answer_serializer(collection.find_one(filter))
+    else:
+        results = [{"error: cannot find matching data"}]
+    
+    return {"status": "ok", "data": results}
+
+# get all
+@answer_api_router.get("/api/get_answers/2018Midterm")
+async def get_answers(question_no: str = Query(None)):
+
+    results = []
+    if question_no:
+        collection = db[f"2018MidtermQ{question_no}"]
+        results = answers_serializer(collection.find())
     else:
         results = [{"error: cannot find matching data"}]
     
@@ -67,17 +80,4 @@ async def delete_answer(question_no: str = Query(None), student_id: str = Query(
 
 
 
-#tokenize string
-import io
-from tokenize import generate_tokens, TokenInfo
-
-def to_words(python_code):
-    tokenized_code = io.StringIO()
-    l = {0: "(EOF)", 4: "(NEWLINE)", 5: "(INDENT)", 6: "(DEDENT)", 59: "(ERROR)"}
-    code_lines = python_code.splitlines()
-    for line in code_lines:
-        tokens = generate_tokens(io.StringIO(line).readline)
-        line_tokens = [l.get(token.type, token.string) if token.type != 3 else token.string.replace("\n", "\\n") for token in tokens if token.type < 60]
-        tokenized_code.write("\n".join(line_tokens) + "\n")
-    return tokenized_code.getvalue()  
     
