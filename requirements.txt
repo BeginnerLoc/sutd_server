@@ -1,0 +1,6 @@
+tqdm
+fastapi
+graphene
+pymongo
+uvicorn
+# sutd_env\Scripts\activate.bat
