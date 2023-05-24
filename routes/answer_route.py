@@ -7,7 +7,7 @@ from schemas.answer_schema import answer_serializer, answers_serializer
 answer_api_router = APIRouter()
 
 
-# retrieve
+# get
 # get single answer using 2 params question_no and student_id
 @answer_api_router.get("/api/get_answer/2018Midterm")
 async def get_answer(question_no: str = Query(None), student_id: str = Query(None)):
@@ -30,11 +30,15 @@ async def submit_answer(answer: Answer):
     python_code = answer.python_code
     student_id = answer.student_id
     collection = db[f"2018MidtermQ{question_no}"]
-    print(python_code)
+    
+    tokenized_code = to_words(python_code)    
+    # tokenized_code = python_code
+
+    print(tokenized_code)
     
     document = {
         'student_id': student_id,
-        'tokenized_code': python_code
+        'tokenized_code': tokenized_code
     }
     
     result = collection.insert_one(document)
@@ -60,3 +64,20 @@ async def delete_answer(question_no: str = Query(None), student_id: str = Query(
         else:
             result = f"No document found with studentid {student_id}."
     return {"status": "ok", "result": result}  
+
+
+
+#tokenize string
+import io
+from tokenize import generate_tokens, TokenInfo
+
+def to_words(python_code):
+    tokenized_code = io.StringIO()
+    l = {0: "(EOF)", 4: "(NEWLINE)", 5: "(INDENT)", 6: "(DEDENT)", 59: "(ERROR)"}
+    code_lines = python_code.splitlines()
+    for line in code_lines:
+        tokens = generate_tokens(io.StringIO(line).readline)
+        line_tokens = [l.get(token.type, token.string) if token.type != 3 else token.string.replace("\n", "\\n") for token in tokens if token.type < 60]
+        tokenized_code.write("\n".join(line_tokens) + "\n")
+    return tokenized_code.getvalue()  
+    
