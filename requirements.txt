@@ -3,4 +3,5 @@ fastapi
 graphene
 pymongo
 uvicorn
+httpx
 # sutd_env\Scripts\activate.bat
