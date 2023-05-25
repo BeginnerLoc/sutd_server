@@ -9,7 +9,7 @@ answer_api_router = APIRouter()
 
 # get
 # get single answer using 2 params question_no and student_id
-@answer_api_router.get("/api/get_answer/2018Midterm")
+@answer_api_router.get("/api/get_answer/2018/midterm")
 async def get_answer(question_no: str = Query(None), student_id: str = Query(None)):
 
     results = []
@@ -23,7 +23,7 @@ async def get_answer(question_no: str = Query(None), student_id: str = Query(Non
     return {"status": "ok", "data": results}
 
 # get all
-@answer_api_router.get("/api/get_answers/2018Midterm")
+@answer_api_router.get("/api/get_answers/2018/midterm")
 async def get_answers(question_no: str = Query(None)):
 
     results = []
@@ -37,7 +37,7 @@ async def get_answers(question_no: str = Query(None)):
 
 # post
 # submit studnet's code as string -> to be tokenized and store in database 
-@answer_api_router.post("/api/submit_answer/2018Midterm")
+@answer_api_router.post("/api/submit_answer/2018/midterm")
 async def submit_answer(answer: Answer):
     question_no = answer.question_no
     python_code = answer.python_code
@@ -64,7 +64,7 @@ async def submit_answer(answer: Answer):
     return {"status": "ok"}
  
 # delete
-@answer_api_router.delete("/api/delete_answer/2018Midterm")
+@answer_api_router.delete("/api/delete_answer/2018/midterm")
 async def delete_answer(question_no: str = Query(None), student_id: str = Query(None)):
 
     result = None
