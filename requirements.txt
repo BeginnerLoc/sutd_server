@@ -4,4 +4,5 @@ graphene
 pymongo
 uvicorn
 httpx
+openai
 # sutd_env\Scripts\activate.bat
