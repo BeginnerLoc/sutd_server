@@ -5,4 +5,5 @@ pymongo
 uvicorn
 httpx
 openai
+pyrthon_multipart
 # sutd_env\Scripts\activate.bat
