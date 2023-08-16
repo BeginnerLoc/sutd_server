@@ -1,4 +1,3 @@
-from multiprocessing import Pool
 from tqdm import tqdm
 
 def closest(values):
@@ -72,8 +71,6 @@ def codeDistW(args):
     return (iNum, max(rowAvg,colAvg))
 
 def calculate(ipt, discount):
-    pool = Pool()
-
     f = open("utils/config.txt", "r")
     keywords = {}
     for line in f:
@@ -92,17 +89,15 @@ def calculate(ipt, discount):
     rows.append([(1) for j in range(len(ref_code) + 1)])
     lWt.append([keywords[ref_code[j]] if ref_code[j] in keywords else 1 for j in range(len(ref_code))])
 
-    # Modification: Iterate from index 1 to exclude the reference code
     for i in range(1, numtexts):
         ret.append(read(ipt[i]))
         rows.append([(1) for j in range(len(ret[i]) + 1)])
         lWt.append([keywords[ret[i][j]] if ret[i][j] in keywords else 1 for j in range(len(ret[i]))])
 
-    # Modification: Exclude the reference code from the arguments
     args = [(discount, ret[0], ret[j], lWt[0], lWt[j], rows[j], j) for j in range(1, numtexts)]
-    ret = [0] * (numtexts + 1)  # Modify the list size to accommodate the distances
+    ret = [0] * (numtexts + 1)
 
-    for i in tqdm(pool.imap_unordered(codeDistW, args, chunksize=10), desc="Calculating distances", total=len(args)):
+    for i in tqdm(map(codeDistW, args), desc="Calculating distances", total=len(args)):
         ret[i[0] + 1] = i[1]
 
     output_values.append("0.000")  # Distance for the reference code
@@ -112,44 +107,8 @@ def calculate(ipt, discount):
     return output_values
 
 
-#main
-# from pymongo import MongoClient
-
-# if __name__ == '__main__':
-#     lambd = 0.9
-#     pool = Pool()
-    
-#     student_id = '2018001'
-#     question = '2018MidtermQ3'
-    
-#     code = [] # contains all tokenized_code
-#     student_id_list = [] # this list aligns with the code list
-
-#     client = MongoClient('mongodb+srv://loctientran235:XUcVn1NKm1N7u6P9@sutd.wuuycxy.mongodb.net/?retryWrites=true&w=majority')
-#     db = client['sutd']
-#     collection = db[question]
-
-#     documents = collection.find({'tokenized_code': {'$exists': True}})
-#     for document in documents:
-#         tokenized_code = document['tokenized_code']
-#         if student_id == document['student_id']:
-#             code.insert(0, tokenized_code)
-#             student_id_list.insert(0, document['student_id'])
-#             # tokenized_code with the matched student_id is always placed at index 0
-#         else:
-#             code.append(tokenized_code)
-#             student_id_list.append(document['student_id'])
-
-    
-#     calculated_values = calculate(code, lambd)
-#     value, code_index = closest(calculated_values)
-    
-#     print(calculated_values)
-#     print(f"Closest file to Student's answer is {student_id_list[code_index]} with a distance of {value}.")
-
-
 #list of code is inclusive of the student code to be compared
-def calculate_code_distance(list_of_code, lambd = 0.9):
+async def calculate_code_distance(list_of_code, lambd = 0.9):
     calculated_values = calculate(list_of_code, lambd)
     value, code_index = closest(calculated_values)
-    return value
+    return value, code_index
